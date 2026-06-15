@@ -2,3 +2,10 @@
   command = "npm ci && npm run build"
   publish = "dist"
   environment = { NODE_VERSION = "20" }
+
+[[redirects]]
+  from = "/api/finance/*"
+  to = "https://query1.finance.yahoo.com/v8/finance/chart/:splat"
+  status = 200
+  force = true
+
