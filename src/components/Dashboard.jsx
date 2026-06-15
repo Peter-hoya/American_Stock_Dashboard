@@ -71,6 +71,13 @@ export default function Dashboard() {
     const [exchangeRate, setExchangeRate] = useState(1350);
     const [isRefreshing, setIsRefreshing] = useState(false);
 
+    // Alert settings state (Option C)
+    const [alertEmail, setAlertEmail] = useState('');
+    const [isAlertEnabled, setIsAlertEnabled] = useState(false);
+    const [alertTargetValue, setAlertTargetValue] = useState(100000000);
+    const [isSyncing, setIsSyncing] = useState(false);
+    const [syncStatus, setSyncStatus] = useState('');
+
     const holdingsRef = useRef(holdings);
     useEffect(() => { holdingsRef.current = holdings; }, [holdings]);
 
@@ -130,23 +137,97 @@ export default function Dashboard() {
 
         fetchMarketData();
         const interval = setInterval(fetchMarketData, 60000);
+
+        // Fetch Alert Settings from Database
+        const fetchAlertSettings = async () => {
+            try {
+                const res = await fetch('/api/sync-holdings');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data) {
+                        setAlertEmail(data.email || '');
+                        setIsAlertEnabled(data.isEnabled || false);
+                        setAlertTargetValue(data.targetValue || 100000000);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to load alert settings:", err);
+            }
+        };
+        fetchAlertSettings();
+
         return () => clearInterval(interval);
     }, []);
 
+    const syncHoldingsOnly = async (updatedHoldings, emailVal = alertEmail, enabledVal = isAlertEnabled, targetVal = alertTargetValue) => {
+        try {
+            await fetch('/api/sync-holdings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    holdings: updatedHoldings.map(h => ({ ticker: h.ticker, name: h.name, shares: h.shares, avgCost: h.avgCost, sector: h.sector })),
+                    email: emailVal || undefined,
+                    isEnabled: enabledVal,
+                    targetValue: targetVal
+                })
+            });
+        } catch (err) {
+            console.error("Auto-sync holdings failed:", err);
+        }
+    };
+
+    const handleSaveAlertSettings = async (email, isEnabled, targetVal) => {
+        setIsSyncing(true);
+        setSyncStatus('설정을 서버에 반영하는 중...');
+        try {
+            const res = await fetch('/api/sync-holdings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    holdings: holdings.map(h => ({ ticker: h.ticker, name: h.name, shares: h.shares, avgCost: h.avgCost, sector: h.sector })),
+                    email,
+                    isEnabled,
+                    targetValue: targetVal
+                })
+            });
+            if (res.ok) {
+                setSyncStatus('알림 설정 및 포트폴리오가 정상적으로 저장되었습니다.');
+                setTimeout(() => setSyncStatus(''), 3000);
+            } else {
+                setSyncStatus('저장에 실패했습니다. 다시 시도해 주세요.');
+            }
+        } catch (err) {
+            console.error("Sync error:", err);
+            setSyncStatus('서버 연결 중 에러가 발생했습니다.');
+        } finally {
+            setIsSyncing(false);
+        }
+    };
+
     const handleAddStock = (newStock) => {
+        let updatedHoldings;
         if (newStock.id) {
-            setHoldings(holdings.map(stock => stock.id === newStock.id ? newStock : stock));
+            updatedHoldings = holdings.map(stock => stock.id === newStock.id ? newStock : stock);
         } else {
             const added = { ...newStock, id: Date.now().toString(), currentPrice: newStock.avgCost, prevClose: newStock.avgCost };
-            setHoldings([...holdings, added]);
+            updatedHoldings = [...holdings, added];
         }
+        setHoldings(updatedHoldings);
         setEditingStock(null);
+        
+        // Sync holdings automatically to database
+        syncHoldingsOnly(updatedHoldings);
+
         // Trigger an immediate background fetch to get the real price for the new stock
         setTimeout(fetchMarketData, 500);
     };
 
     const handleDeleteStock = (id) => {
-        setHoldings(holdings.filter(stock => stock.id !== id));
+        const updatedHoldings = holdings.filter(stock => stock.id !== id);
+        setHoldings(updatedHoldings);
+        
+        // Sync holdings automatically to database
+        syncHoldingsOnly(updatedHoldings);
     };
 
     // Derived State calculations
@@ -265,6 +346,127 @@ export default function Dashboard() {
             ) : (
                 <BrokerView holdings={holdings} exchangeRate={exchangeRate} />
             )}
+
+            {/* Alert Settings Card */}
+            <section className="toss-card" style={{ marginTop: '24px', padding: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                    <div>
+                        <h2 style={{ fontSize: '20px', fontWeight: '700', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span>🔔</span> 포트폴리오 1억원 달성 알림 설정
+                        </h2>
+                        <p style={{ fontSize: '14px', color: 'var(--text-secondary)', margin: '6px 0 0 0', lineHeight: '1.5' }}>
+                            자산 총액이 설정한 금액에 도달하면 백그라운드 서버가 매시간 주가를 감시하여 자동으로 이메일 알림을 보냅니다.
+                        </p>
+                    </div>
+                    <label className="switch" style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}>
+                        <input
+                            type="checkbox"
+                            checked={isAlertEnabled}
+                            onChange={(e) => {
+                                const checked = e.target.checked;
+                                setIsAlertEnabled(checked);
+                                handleSaveAlertSettings(alertEmail, checked, alertTargetValue);
+                            }}
+                            style={{ display: 'none' }}
+                        />
+                        <div style={{
+                            width: '48px',
+                            height: '28px',
+                            backgroundColor: isAlertEnabled ? 'var(--primary)' : '#cbd5e1',
+                            borderRadius: '14px',
+                            position: 'relative',
+                            transition: 'background-color 0.2s'
+                        }}>
+                            <div style={{
+                                width: '22px',
+                                height: '22px',
+                                backgroundColor: '#ffffff',
+                                borderRadius: '50%',
+                                position: 'absolute',
+                                top: '3px',
+                                left: isAlertEnabled ? '23px' : '3px',
+                                transition: 'left 0.2s',
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+                            }} />
+                        </div>
+                    </label>
+                </div>
+
+                {isAlertEnabled && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginTop: '20px', alignItems: 'flex-end' }}>
+                        <div style={{ flex: 1, minWidth: '240px' }}>
+                            <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                                알림을 수신할 이메일 주소
+                            </label>
+                            <input
+                                type="email"
+                                placeholder="example@email.com"
+                                value={alertEmail}
+                                onChange={(e) => setAlertEmail(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px 16px',
+                                    borderRadius: '10px',
+                                    border: '1px solid var(--border-default)',
+                                    fontSize: '15px',
+                                    backgroundColor: 'var(--bg-primary)',
+                                    color: 'var(--text-primary)',
+                                    outline: 'none',
+                                    transition: 'border-color 0.2s'
+                                }}
+                            />
+                        </div>
+                        <div style={{ width: '180px' }}>
+                            <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                                목표 금액 (원)
+                            </label>
+                            <input
+                                type="number"
+                                placeholder="100000000"
+                                value={alertTargetValue}
+                                onChange={(e) => setAlertTargetValue(Number(e.target.value))}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px 16px',
+                                    borderRadius: '10px',
+                                    border: '1px solid var(--border-default)',
+                                    fontSize: '15px',
+                                    backgroundColor: 'var(--bg-primary)',
+                                    color: 'var(--text-primary)',
+                                    outline: 'none',
+                                    transition: 'border-color 0.2s'
+                                }}
+                            />
+                        </div>
+                        <button
+                            onClick={() => handleSaveAlertSettings(alertEmail, isAlertEnabled, alertTargetValue)}
+                            disabled={isSyncing}
+                            style={{
+                                padding: '12px 24px',
+                                borderRadius: '10px',
+                                backgroundColor: 'var(--primary)',
+                                color: '#ffffff',
+                                border: 'none',
+                                fontSize: '15px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                transition: 'opacity 0.2s',
+                                height: '46px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            {isSyncing ? '저장 중...' : '설정 저장'}
+                        </button>
+                    </div>
+                )}
+                {syncStatus && (
+                    <div style={{ marginTop: '12px', fontSize: '13px', color: syncStatus.includes('실패') ? '#ef4444' : 'var(--primary)', fontWeight: '500' }}>
+                        {syncStatus}
+                    </div>
+                )}
+            </section>
 
             <AddStockModal
                 isOpen={isAddModalOpen}

@@ -1,0 +1,96 @@
+// American Stock Dashboard DB Schema
+// 모든 시간은 UTC로 저장
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("NETLIFY_DATABASE_URL")
+}
+
+model DashboardHolding {
+  id        Int      @id @default(autoincrement())
+  ticker    String   @unique
+  name      String
+  shares    Float
+  avgCost   Float
+  sector    String
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("dashboard_holdings")
+}
+
+model DashboardAlertSetting {
+  id              Int       @id @default(autoincrement())
+  email           String    @unique
+  targetValue     Float     @default(100000000) // 기본 1억원
+  lastAlertSentAt DateTime? @map("last_alert_sent_at")
+  isEnabled       Boolean   @default(true) @map("is_enabled")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@map("dashboard_alert_settings")
+}
+
+// ============================================================
+// Shared Models with Threads_DB to prevent dropping tables during migrations
+// ============================================================
+model Account {
+  id          Int      @id @default(autoincrement())
+  accountName String   @unique @map("account_name")
+  description String?
+  threadsUserId      String? @map("threads_user_id")
+  threadsAccessToken  String? @map("threads_access_token")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  templates Template[]
+  posts     Post[]
+
+  @@map("accounts")
+}
+
+model Template {
+  id           Int      @id @default(autoincrement())
+  accountId    Int      @map("account_id")
+  templateCode String   @map("template_code")
+  templateName String?  @map("template_name")
+  promptText   String   @map("prompt_text")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  posts   Post[]
+
+  @@unique([accountId, templateCode])
+  @@map("templates")
+}
+
+model Post {
+  id          Int      @id @default(autoincrement())
+  accountId   Int      @map("account_id")
+  platform    String   @map("platform")
+  content     String   @map("content")
+  templateId  Int?     @map("template_id")
+
+  status      String   @default("pending") @map("status")
+  scheduledAt DateTime? @map("scheduled_at")
+  publishedAt DateTime? @map("published_at")
+
+  postIdExternal String? @map("post_id_external")
+  errorMessage   String? @map("error_message")
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  account  Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  template Template? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  @@index([status, scheduledAt])
+  @@index([accountId, platform])
+  @@map("posts")
+}
