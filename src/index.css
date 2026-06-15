@@ -1,0 +1,78 @@
+:root {
+  /* Color Palette - Toss Design System */
+  --primary: #3182f6;
+  --primary-hover: #2272eb;
+  --error: #f04452;
+  --success: #03b26c;
+  
+  --bg-primary: #ffffff;
+  --bg-secondary: #f2f4f6; /* grey100 */
+  
+  --border-default: #e5e8eb; /* grey200 */
+  
+  --text-primary: #191f28; /* grey900 */
+  --text-secondary: #6b7684; /* grey600 */
+  --text-caption: #8b95a1; /* grey500 */
+  --text-inverse: #ffffff;
+
+  /* Typography */
+  --font-sans: "Toss Product Sans", "Tossface", "SF Pro KR", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Basier Square", "Apple SD Gothic Neo", Roboto, "Noto Sans KR", sans-serif;
+  --font-mono: "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Shadows */
+  --shadow-subtle: 0px 1px 3px rgba(0,0,0,0.06);
+  --shadow-standard: 0px 2px 8px rgba(0,0,0,0.08);
+  --shadow-elevated: 0px 4px 12px rgba(0,0,0,0.12);
+  --shadow-modal: 0px 8px 24px rgba(0,0,0,0.16);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-secondary); /* Toss uses light gray background for the main canvas usually, or white. Let's use f2f4f6 for the outer canvas to make white cards pop */
+  color: var(--text-primary);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Base Utility Classes */
+.toss-card {
+  background: var(--bg-primary);
+  border-radius: 12px;
+  box-shadow: var(--shadow-standard);
+}
+
+.text-profit {
+  color: var(--success);
+}
+
+.text-loss {
+  color: var(--error);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}

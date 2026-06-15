@@ -1,0 +1,202 @@
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.table-header {
+    padding: 24px 32px;
+    border-bottom: 1px solid var(--border-default);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.add-stock-btn {
+    padding: 0 20px;
+    height: 40px;
+    background-color: var(--primary);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.add-stock-btn:hover {
+    background-color: var(--primary-hover);
+}
+
+.stock-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.stock-table th {
+    padding: 16px 24px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    border-bottom: 1px solid var(--border-default);
+    white-space: nowrap;
+}
+
+.stock-table td {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-default);
+    vertical-align: middle;
+}
+
+.stock-row {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.stock-row:hover {
+    background-color: var(--bg-secondary);
+}
+
+/* Freeze the first column */
+.stock-table th:first-child,
+.stock-table td:first-child {
+    position: sticky;
+    left: 0;
+    background-color: var(--bg-primary);
+    z-index: 2;
+}
+
+/* Add a subtle shadow to the sticky column to indicate it overlaps */
+.stock-table th:first-child::after,
+.stock-table td:first-child::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -4px;
+    bottom: -1px;
+    width: 4px;
+    background: linear-gradient(90deg, rgba(0,0,0,0.03) 0%, transparent 100%);
+    pointer-events: none;
+}
+
+/* Maintain hover effect on sticky column */
+.stock-row:hover td:first-child {
+    background-color: var(--bg-secondary);
+}
+
+.stock-row:last-child td {
+    border-bottom: none;
+}
+
+.ticker-symbol {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.ticker-name {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-secondary {
+    color: var(--text-secondary);
+}
+
+.fw-bold {
+    font-weight: 600;
+}
+
+.text-sm {
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 64px !important;
+    color: var(--text-caption);
+    font-size: 15px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.delete-btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background-color: transparent;
+    color: var(--text-caption);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.delete-btn:hover {
+    background-color: rgba(240, 68, 82, 0.1);
+    color: var(--error);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .stock-table th,
+    .stock-table td {
+        padding: 12px 16px;
+        font-size: 13px;
+    }
+
+    .ticker-symbol {
+        font-size: 14px;
+    }
+
+    .ticker-name {
+        font-size: 12px;
+    }
+
+    .ticker-logo {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 12px !important;
+    }
+
+    .stock-ticker {
+        gap: 8px !important;
+    }
+
+    .table-header {
+        padding: 16px 20px !important;
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 12px;
+    }
+
+    .add-stock-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+.broker-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}

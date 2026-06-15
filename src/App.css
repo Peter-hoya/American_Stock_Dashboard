@@ -1,0 +1,69 @@
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  padding: 32px 24px;
+  gap: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Header */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-bottom: 8px;
+}
+
+.dashboard-header h1 {
+  font-size: 32px;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.date-display {
+  color: var(--text-secondary);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .app-container {
+    padding: 16px 12px;
+    gap: 16px;
+  }
+  
+  .main-content {
+    gap: 16px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px !important;
+  }
+
+  .dashboard-header h1 {
+    font-size: 24px;
+  }
+
+  .date-display {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+  
+  .dashboard-header > div:last-child {
+      align-items: flex-start !important;
+      margin-top: 8px;
+  }
+}

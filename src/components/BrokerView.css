@@ -1,0 +1,202 @@
+.broker-view {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Broker card */
+.broker-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+.broker-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--border-default);
+}
+
+.broker-card-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.broker-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--bg-primary);
+    flex-shrink: 0;
+}
+
+.broker-stats {
+    display: flex;
+    gap: 32px;
+    align-items: center;
+}
+
+.broker-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.broker-stat-label {
+    font-size: 12px;
+    color: var(--text-caption);
+    font-weight: 500;
+}
+
+.broker-stat-value {
+    font-size: 18px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Proportion bar */
+.broker-proportion {
+    padding: 0 28px 20px;
+}
+
+.proportion-bar-bg {
+    width: 100%;
+    height: 6px;
+    background: var(--bg-secondary);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 12px;
+}
+
+.proportion-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.proportion-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 6px;
+}
+
+.proportion-label span {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Holdings mini-table inside broker card */
+.broker-holdings-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.broker-holdings-table th {
+    padding: 10px 28px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-caption);
+    text-align: left;
+    border-bottom: 1px solid var(--border-default);
+}
+
+.broker-holdings-table th.text-right {
+    text-align: right;
+}
+
+.broker-holdings-table td {
+    padding: 14px 28px;
+    font-size: 14px;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-default);
+    font-variant-numeric: tabular-nums;
+}
+
+.broker-holdings-table td.text-right {
+    text-align: right;
+}
+
+.broker-holdings-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.broker-holdings-table .ticker-cell {
+    font-weight: 600;
+}
+
+.broker-holdings-table .name-cell {
+    color: var(--text-secondary);
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+/* Freeze the first column */
+.broker-holdings-table th:first-child,
+.broker-holdings-table td:first-child {
+    position: sticky;
+    left: 0;
+    background-color: var(--bg-primary);
+    z-index: 2;
+}
+
+/* Add a subtle shadow to the sticky column to indicate it overlaps */
+.broker-holdings-table th:first-child::after,
+.broker-holdings-table td:first-child::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -4px;
+    bottom: -1px;
+    width: 4px;
+    background: linear-gradient(90deg, rgba(0,0,0,0.03) 0%, transparent 100%);
+    pointer-events: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .broker-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 20px;
+    }
+
+    .broker-stats {
+        gap: 16px;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .broker-stat {
+        align-items: flex-start;
+    }
+
+    .broker-proportion {
+        padding: 0 20px 20px;
+    }
+
+    .broker-holdings-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .broker-holdings-table th, 
+    .broker-holdings-table td {
+        padding: 12px 20px;
+        font-size: 13px;
+    }
+}
